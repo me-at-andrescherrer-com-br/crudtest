@@ -25,6 +25,7 @@ Route::group(['middleware' => 'api','prefix' => 'auth'], function () {
 });
 
 Route::group(['middleware' => 'auth.jwt'], function () {
-    Route::resource('products', 'ProductController')->except(['create', 'edit']);
-    Route::resource('users', 'UserController')->except(['create', 'edit']);
+    Route::resource('users', 'UserController')->except(['create', 'edit']);    
+    Route::resource('products', 'ProductController')->except(['create', 'edit']);    
+    Route::resource('users/{user}/products', 'UserProductsController')->only(['index']);    
 });

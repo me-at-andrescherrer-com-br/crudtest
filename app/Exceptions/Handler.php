@@ -6,6 +6,7 @@ use Exception;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class Handler extends ExceptionHandler
@@ -49,6 +50,7 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
+        // dd($exception);
         if ($exception instanceof Tymon\JWTAuth\Exceptions\TokenExpiredException) {
             return response()->json(['token_expired'], $exception->getStatusCode());
         } else if ($exception instanceof Tymon\JWTAuth\Exceptions\TokenInvalidException) {
@@ -59,6 +61,8 @@ class Handler extends ExceptionHandler
             return response()->json(['message' => 'Not found'], 404);
         } else if ($exception instanceof UnauthorizedHttpException) {
             return response()->json(['message' => 'Token has expired'], 403);
+        } else if ($exception instanceof NotFoundHttpException) {
+            return response()->json(['message' => 'Not found'], 404);
         }
         return parent::render($request, $exception);
     }

@@ -22,6 +22,8 @@ class UserController extends Controller
 
         if ($role === 'producer')
             return responder()->success(User::where('role',$role)->with('products')->paginate(10))->respond();
+        else if ($role === 'all')
+            return responder()->success(User::paginate(10))->respond();
 
         return responder()->success(User::where('role',$role)->paginate(10))->respond();
     }

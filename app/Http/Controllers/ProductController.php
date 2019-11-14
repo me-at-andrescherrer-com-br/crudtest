@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Product;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
+use App\Transformers\ProductTransformer;
 
 class ProductController extends Controller
 {
@@ -17,7 +18,7 @@ class ProductController extends Controller
      */
     public function index()
     {
-        return responder()->success(Product::with('user')->paginate(10))->respond();
+        return responder()->success(Product::with('user')->paginate(10), ProductTransformer::class)->respond();
     }
 
     /**
@@ -28,7 +29,7 @@ class ProductController extends Controller
      */
     public function store(StoreProductRequest $request)
     {
-        $data = $request->validated();        
+        $data = $request->validated();      
 
         if ($data) {
             if (request()->has('picture'))
@@ -38,8 +39,13 @@ class ProductController extends Controller
                 return responder()->error('Not Authorized', 'You are not authorized to perform this action.')->respond(403);
             
             $product = Product::create($data);
-            return responder()->success($product)->respond();
+            return responder()->success($product, ProductTransformer::class)->respond();
         }
+    }
+
+    public function show(Product $product)
+    {   
+        return responder()->success($product, ProductTransformer::class)->respond();
     }
 
     /**
@@ -48,10 +54,11 @@ class ProductController extends Controller
      * @param  \App\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function show(Product $product)
-    {
-        return responder()->success($product)->respond();
-    }
+    // public function show(Product $product)
+    // {
+    //     return responder()->success($product)->respond();
+    //     // return responder()->success($product, ProductTransformer::class)->respond();
+    // }
 
     /**
      * Update the specified resource in storage.
@@ -64,19 +71,21 @@ class ProductController extends Controller
     {
         $data = $request->validated();
 
-        if ($data) {
-            if (request()->has('picture'))
+        // dd($request->all());
 
+        if ($data) {
+            if (request()->has('picture')){
                 if(isset($product->picture))
                     $this->deletePicture($product->picture);
-
+    
                 $data['picture'] = $this->savePicture(request()->picture, auth()->user()->id);
+            }
 
             if (auth()->user()->role == 'customer')
                 return responder()->error('Not Authorized', 'You are not authorized to perform this action.')->respond(403);
             
             $product->update($data);
-            return responder()->success($product)->respond();
+            return responder()->success($product, ProductTransformer::class)->respond();
         }
     }
 
